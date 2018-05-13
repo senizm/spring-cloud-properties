@@ -1,0 +1,91 @@
+---
+### Default properties for this module
+
+security:
+  basic:
+    path: /**
+  user:
+    name: ${EUREKA_USERNAME:senizm}
+    password: ${EUREKA_PASSWORD:senizmadm}
+
+server:
+  port: ${EUREKA_PORT:8761}
+  contextPath: /${spring.application.name}
+
+eureka:
+  server:
+    enableSelfPreservation: false
+    waitTimeInMsWhenSyncEmpty: 0
+    peerNodeConnectionIdleTimeoutSeconds: 5
+    evictionIntervalTimerInMs: 5000
+    renewalThresholdUpdateIntervalMs: 10000
+    peerEurekaNodesUpdateIntervalMs: 10000
+    peerEurekaStatusRefreshTimeIntervalMs: 10000
+  instance:
+    hostname: ${EUREKA_HOST:localhost}
+  client:
+    registerWithEureka: false
+    fetchRegistry: false
+    serviceUrl:
+      defaultZone: http://${security.user.name}:${security.user.password}@${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}${server.contextPath}/eureka/
+
+---
+spring:
+  profiles: eureka-peer-1
+server:
+  port: ${EUREKA_PEER1_PORT:8761}
+eureka:
+  instance:
+    hostname: ${EUREKA_PEER1_HOST:eureka-peer-1}
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://${security.user.name}:${security.user.password}@${EUREKA_PEER2_HOST:eureka-peer-2}:${EUREKA_PEER2_PORT:8762}${server.contextPath}/eureka/
+
+---
+spring:
+  profiles: eureka-peer-2
+server:
+  port: ${EUREKA_PEER2_PORT:8762}
+eureka:
+  instance:
+    hostname: ${EUREKA_PEER2_HOST:eureka-peer-2}
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://${security.user.name}:${security.user.password}@${EUREKA_PEER1_HOST:eureka-peer-1}:${EUREKA_PEER1_PORT:8761}${server.contextPath}/eureka/
+
+---
+### Properties for dev profile
+### Dev profile is used on the following environments:
+###  a. During local development done by developers
+### In short, this profile is mainly used for development environments.
+###
+spring:
+  profiles: dev
+
+---
+### Properties for test profile
+### Test profile is used on the following environments:
+###  a. Local integration tests done by developers
+###  b. Remote integration tests done automatically by CI servers
+### In short, this profile is mainly used by integration tests
+###  whether they are run manually by the developers, or automatically by the CI servers.
+### CI servers may choose to override this settings should they need to run integration tests on another database.
+###
+spring:
+  profiles: test
+
+---
+### Properties for production profile
+### Production profile is used on the following environments:
+###  a. Production deployments
+###  b. User Acceptance Test deployments
+### UAT deployment only differs in application level configuration such as IP addresses, FTP username and passwords, etc.
+### All application level configuration parameters should be specified on the datasource.
+### Therefore, static module configuration should not differ between UAT and production deployments.
+###
+spring:
+  profiles: prod

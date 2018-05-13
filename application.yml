@@ -1,0 +1,84 @@
+---
+### Default properties for this module
+eureka:
+  instance:
+    preferIpAddress: true
+    leaseRenewalIntervalInSeconds: 2
+    # Indicates how often the eureka client needs to send heartbeats to eureka server.
+    leaseExpirationDurationInSeconds: 6
+    # Indicates the time that the eureka server waits since it received the last heartbeat before it can remove this instance from its view.
+    statusPageUrlPath: ${server.contextPath}${management.context-path}/info
+    healthCheckUrlPath: ${server.contextPath}${management.context-path}/health
+    metadataMap:
+      instanceId: ${spring.application.name}:${spring.application.instance_id:${server.port}}
+      # For starting multiple instances of the same application on different hosts.
+  client:
+    registryFetchIntervalSeconds: 5
+    serviceUrl:
+      defaultZone: http://${EUREKA_USERNAME:senizm}:${EUREKA_PASSWORD:senizmadm}@${EUREKA_HOST:localhost}:${EUREKA_PORT:8761}/eureka/eureka/
+
+logging:
+  level:
+    com.netflix.discovery: INFO
+    org.springframework.boot.actuate.audit.listener: WARN
+    org.springframework.cloud: INFO
+    org.springframework.web: INFO
+
+management:
+  context-path: /admin
+
+server:
+  contextPath:
+
+security:
+  basic:
+    path: ${server.contextPath}${management.context-path}/**
+
+endpoints:
+  health:
+    sensitive: false
+
+---
+### Properties for dev profile
+### Dev profile is used on the following environments:
+###  a. During local development done by developers
+### In short, this profile is mainly used for development environments.
+###
+spring:
+  profiles: dev
+
+endpoints:
+  restart:
+    enabled: true
+  shutdown:
+    enabled: true
+
+---
+### Properties for test profile
+### Test profile is used on the following environments:
+###  a. Local integration tests done by developers
+###  b. Remote integration tests done automatically by CI servers
+### In short, this profile is mainly used by integration tests
+###  whether they are run manually by the developers, or automatically by the CI servers.
+### CI servers may choose to override this settings should they need to run integration tests on another database.
+###
+spring:
+  profiles: test
+
+endpoints:
+  restart:
+    enabled: true
+  shutdown:
+    enabled: true
+
+---
+### Properties for production profile
+### Production profile is used on the following environments:
+###  a. Production deployments
+###  b. User Acceptance Test deployments
+### UAT deployment only differs in application level configuration such as IP addresses, FTP username and passwords, etc.
+### All application level configuration parameters should be specified on the datasource.
+### Therefore, static module configuration should not differ between UAT and production deployments.
+###
+spring:
+  profiles: prod
